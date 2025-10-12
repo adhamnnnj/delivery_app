@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    tools:context=".registration">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="48dp" />
+
+    <!-- Email -->
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Email Address"
+        android:inputType="textEmailAddress"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- Phone -->
+    <EditText
+        android:id="@+id/etPhone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Phone Number"
+        android:inputType="phone"
+        app:layout_constraintTop_toBottomOf="@id/etEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- Password -->
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/etPhone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- Confirm Password -->
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/etPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- Buyer / Seller Selection -->
+    <RadioGroup
+        android:id="@+id/rgUserType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/etConfirmPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="16dp">
+
+        <RadioButton
+            android:id="@+id/rbBuyer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Buyer"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/rbSeller"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seller"
+            android:layout_marginStart="24dp" />
+    </RadioGroup>
+
+    <!-- Register Button -->
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        app:layout_constraintTop_toBottomOf="@id/rgUserType"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="16dp"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@android:color/white" />
+
+    <!-- Login Redirect -->
+    <TextView
+        android:id="@+id/tvLoginRedirect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Already have an account? Login"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/btnRegister"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

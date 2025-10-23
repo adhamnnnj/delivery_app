@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class registration : AppCompatActivity() {
 
@@ -24,10 +25,9 @@ class registration : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.registration_activity)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // Bind views
+        // Initialize views
         etEmail = findViewById(R.id.etEmail)
         etPhone = findViewById(R.id.etPhone)
         etConfPass = findViewById(R.id.etConfirmPassword)
@@ -50,14 +50,19 @@ class registration : AppCompatActivity() {
     }
 
     private fun signUpUser() {
-        val email = etEmail.text.toString()
-        val phone = etPhone.text.toString()
-        val pass = etPass.text.toString()
-        val confirmPassword = etConfPass.text.toString()
-        val userType = if (rbBuyer.isChecked) "Buyer" else "Seller"
+        val email = etEmail.text.toString().trim()
+        val phone = etPhone.text.toString().trim()
+        val pass = etPass.text.toString().trim()
+        val confirmPassword = etConfPass.text.toString().trim()
+        val userType = when {
+            rbBuyer.isChecked -> "Buyer"
+            rbSeller.isChecked -> "Seller"
+            else -> ""
+        }
 
-        if (email.isBlank() || pass.isBlank() || confirmPassword.isBlank() || phone.isBlank()) {
-            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
+        // Validate fields
+        if (email.isEmpty() || phone.isEmpty() || pass.isEmpty() || confirmPassword.isEmpty() || userType.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -66,19 +71,42 @@ class registration : AppCompatActivity() {
             return
         }
 
-        // Create Firebase user
+        if (pass.length < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create user in Firebase Authentication
         auth.createUserWithEmailAndPassword(email, pass)
-            .addOnCompleteListener(this) { task ->
+            .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Sign Up Successful as $userType!", Toast.LENGTH_SHORT).show()
+                    val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val userMap = mapOf(
+                        "email" to email,
+                        "phone" to phone,
+                        "userType" to userType
+                    )
 
-                    // (Optional) Save phone and user type to Firestore later
+                    FirebaseDatabase.getInstance().getReference("Users")
+                        .child(userId)
+                        .setValue(userMap)
+                        .addOnCompleteListener { saveTask ->
+                            if (saveTask.isSuccessful) {
+                                Toast.makeText(this, "Registration successful!", Toast.LENGTH_LONG).show()
 
-                    val intent = Intent(this, LoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                                // Redirect to Login screen after saving data
+                                val intent = Intent(this, LoginActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+
+                            } else {
+                                Toast.makeText(this, "Failed to save data: ${saveTask.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+
                 } else {
-                    Toast.makeText(this, "Sign Up Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }

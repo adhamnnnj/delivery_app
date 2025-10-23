@@ -4,60 +4,88 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var tvRedirectSignUp: TextView
-    lateinit var etEmail: EditText
+    private lateinit var etEmail: EditText
     private lateinit var etPass: EditText
-    lateinit var btnLogin: Button
-    lateinit var btnSignUp: Button
+    private lateinit var btnLogin: Button
 
-    // Creating firebaseAuth object
-    lateinit var auth: FirebaseAuth
+    private lateinit var auth: FirebaseAuth
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        // Initialize views
         tvRedirectSignUp = findViewById(R.id.tvRedirectSignUp)
-        btnLogin = findViewById(R.id.btnLogin)
         etEmail = findViewById(R.id.etEmail)
         etPass = findViewById(R.id.etPassword)
+        btnLogin = findViewById(R.id.btnLogin)
 
-        // initialising Firebase auth object
+        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
+        // Handle login button
         btnLogin.setOnClickListener {
             login()
         }
 
+        // Redirect to registration screen
         tvRedirectSignUp.setOnClickListener {
             val intent = Intent(this, registration::class.java)
             startActivity(intent)
-            // using finish() to end the activity
             finish()
         }
     }
 
     private fun login() {
-        val email = etEmail.text.toString()
-        val pass = etPass.text.toString()
-        // calling signInWithEmailAndPassword(email, pass)
-        // function using Firebase auth object
-        // On successful response Display a Toast
-        auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(this) {
-            if (it.isSuccessful) {
-                Toast.makeText(this, "Successfully LoggedIn", Toast.LENGTH_SHORT).show()
-            } else
-                Toast.makeText(this, "Log In failed ", Toast.LENGTH_SHORT).show()
-        }
-    }
+        val email = etEmail.text.toString().trim()
+        val pass = etPass.text.toString().trim()
 
+        if (email.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(applicationContext, "Please enter both email and password", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val userId = user?.uid
+
+                    if (userId != null) {
+                        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+
+                        // Record or update data in Realtime Database
+                        val userData = mapOf(
+                            "email" to user.email,
+                            "lastLogin" to System.currentTimeMillis().toString()
+                        )
+
+                        userRef.updateChildren(userData)
+                            .addOnCompleteListener { dbTask ->
+                                if (dbTask.isSuccessful) {
+                                    Toast.makeText(applicationContext, "Successfully Logged In!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(applicationContext, "Login success, but failed to update database.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    }
+
+                    // Redirect to next activity (optional)
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Toast.makeText(applicationContext, "Login Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
 }
